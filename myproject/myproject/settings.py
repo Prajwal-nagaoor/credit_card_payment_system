@@ -76,7 +76,7 @@ WSGI_APPLICATION = "myproject.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.mysql",
-        "NAME": "CREDIT_CARD_PAYMENTS",
+        "NAME": "credit_card_system",
         "USER":"root",
         "PASSWORD":"Prajwal@123",
         "HOST":"localhost",
@@ -130,3 +130,6 @@ MAILERS = {
         "BACKEND": "django.core.mail.backends.console.EmailBackend",
     },
 }
+
+
+AUTH_USER_MODEL = "users.User"
