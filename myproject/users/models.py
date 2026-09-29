@@ -5,8 +5,14 @@ from django.contrib.auth.models import AbstractUser
 class User(AbstractUser):
     email = models.EmailField(unique=True)
 class Cards(models.Model):
+    CARD_TYPE_CHOICES = [
+        ("CREDIT","credit"),
+        ("DEBIT","debit"),
+    ]
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+    card_type = models.CharField(max_length=15, choices=CARD_TYPE_CHOICES)
     card_number = models.CharField(max_length=16)
+    last_four_digit = models.CharField(max_length=4)
     expiry_data = models.CharField(max_length=5)
     card_holder_name = models.CharField(max_length=100)
 class Transactions(models.Model):
@@ -15,3 +21,12 @@ class Transactions(models.Model):
     amount = models.DecimalField(max_digits=5, decimal_places=2)
     status = models.CharField(max_length=20)
     timestamp = models.DateTimeField(auto_now_add=True)
+class AdminLogs(models.Model):
+    admin = models.ForeignKey(
+        User,on_delete=models.CASCADE
+    )
+    action = models. CharField(max_length=255)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.admin.username} - {self.action}"
