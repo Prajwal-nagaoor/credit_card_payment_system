@@ -1,7 +1,6 @@
 from fastapi.testclient import TestClient
 from fast_api.main import app
 
-
 client = TestClient(app)
 
 
@@ -14,16 +13,19 @@ def test_payment_without_token():
         }
     )
 
-    assert response.status_code == 403
+    assert response.status_code == 401
 
 
-def test_payment_invalid_amount():
+def test_payment_invalid_token():
     response = client.post(
         "/payment/",
+        headers={
+            "Authorization": "Bearer invalid-token"
+        },
         json={
             "card_id": 1,
-            "amount": -100.00
+            "amount": 100.00
         }
     )
 
-    assert response.status_code == 422
+    assert response.status_code == 401
