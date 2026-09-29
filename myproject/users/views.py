@@ -41,37 +41,36 @@ def register(request):
                 },
                 status = 400
             )
-        if not re.match(r"^[A-Za-z1-9._%+-]+@\.[A-Za-z]{2,}$", email):
+        if not re.match(r"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$", email):
             return JsonResponse(
-                {
-                    "ERROR":"Invalid Email format"
-                },
-                status = 400
-            )
+        {
+            "ERROR": "Invalid Email format"
+        },
+        status=400
+    )
         if len(password) < 8:
             return JsonResponse(
-                {"ERROR":"Password much contain at least 8 character"},
-                status = 400
-            )
-        if not re.search(r"[A-Z]", password):
-            return JsonResponse(
-                {
-                    "ERROR":"Password must contain at least one upper case letters"
-                }, status = 400
-            )
-        if not re.search(r"[a-z]", password):
-            return JsonResponse(
-                {
-                    "ERROR":"Password must contain at least one lower case latters"
-                },status = 400
+                {"ERROR": "Password must contain at least 8 characters"},
+                status=400
             )
 
-        if not re.search(r"/d", password):
+        if not re.search(r"[A-Z]", password):
             return JsonResponse(
-                {
-                    "ERROR":"Password must contain at least one number"
-                }, status = 400
+                {"ERROR": "Password must contain at least one uppercase letter"},
+                status=400
             )
+
+        if not re.search(r"[a-z]", password):
+            return JsonResponse(
+                {"ERROR": "Password must contain at least one lowercase letter"},
+                status=400
+            )
+
+        if not re.search(r"\d", password):
+            return JsonResponse(
+                {"ERROR": "Password must contain at least one number"},
+                status=400
+    )
         
         if User.objects.filter(username= username).exists():
             return JsonResponse(
@@ -245,11 +244,12 @@ def add_card(request):
                     "error":"Card holder name can contain only latters and one space"
                 }, status = 400
             )
-        if not re.match(r"^(0[1-9]1[0-9]{2})$", expiry_date):
+        if not re.match(r"^(0[1-9]|1[0-2])-[0-9]{2}$", expiry_date):
             return JsonResponse(
                 {
-                    "ERROR":"the expiry date format is MM-YY"
-                }, status = 400
+                    "ERROR": "the expiry date format is MM-YY"
+                },
+                status=400
             )
 
         if card_type not in ["CREDIT", "DEBIT"]:

@@ -77,13 +77,12 @@ DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.mysql",
         "NAME": "credit_card_system",
-        "USER":"root",
-        "PASSWORD":"Prajwal@123",
-        "HOST":"mysql",
-        "PORT":"3306"
+        "USER": "root",
+        "PASSWORD": "Prajwal@123",
+        "HOST": "localhost",
+        "PORT": "3306",
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/6.1/ref/settings/#auth-password-validators
