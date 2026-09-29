@@ -13,6 +13,7 @@ class Card(Base):
     last_four_digit = Column(String(4), nullable=False)
     expiry_data = Column(String(5), nullable=False)
     card_holder_name = Column(String(100), nullable=False)
+    balance = Column(Numeric(10,2), nullable=False)
 
 
 class Transaction(Base):

@@ -4,6 +4,7 @@ from fast_api.authentication import get_current_user
 from sqlalchemy.orm import Session
 from fast_api.database import get_db
 from fast_api.models import Card, Transaction
+from decimal import Decimal
 
 router = APIRouter(
     prefix="/payment",
@@ -31,22 +32,46 @@ def make_payment(paymnet:paymentrequest,
     db.add(transaction)
     db.commit()
     db.refresh(transaction)
+    if card.card_type == "DEBIT":
 
-    if paymnet.amount <= 1000:
-        transaction.status = "SUCCESS"
+        if card.balance < paymnet.amount:
+            transaction.status = "FAILED"
+
+            db.commit()
+            db.refresh(transaction)
+
+            return {
+                "message": "Transaction Failed",
+                "reason": "Insufficient balance",
+                "transaction": {
+                    "id": transaction.id,
+                    "user_id": transaction.user_id,
+                    "card_id": transaction.card_id,
+                    "amount": float(transaction.amount),
+                    "status": transaction.status,
+                    "timestamp": transaction.timestamp
+                },
+                "available_balance": float(card.balance)
+            }
+
+        else:
+            card.balance -= Decimal(str(paymnet.amount))
+            transaction.status = "SUCCESS"
+
     else:
-        transaction.status = "FAILED"
+        transaction.status = "SUCCESS"
+
     db.commit()
     db.refresh(transaction)
+
     return {
-        "message":"payment request received",
-        "transaction":{
-            "id":transaction.id,
-            "user_id":transaction.user_id,
-            "card_id":transaction.card_id,
-            "amount":float(transaction.amount),
-            "Status":transaction.status,
-            "timestamp":transaction.timestamp
+        "message": "Payment successful",
+        "transaction": {
+            "id": transaction.id,
+            "user_id": transaction.user_id,
+            "card_id": transaction.card_id,
+            "amount": float(transaction.amount),
+            "status": transaction.status,
+            "timestamp": transaction.timestamp
         }
     }
-
