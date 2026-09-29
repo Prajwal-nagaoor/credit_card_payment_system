@@ -10,6 +10,7 @@ from django.views.decorators.csrf import csrf_exempt
 from .authentication import get_authenticated_user
 from .models import Cards,Transactions
 import csv
+import re
 
 # Create your views here.
 User = get_user_model()
@@ -33,6 +34,45 @@ def register(request):
                 {"error":"All the fields are manditory"},
                 status = 400
             )
+        if not re.match(r"^[A-Za-z0-9_]+$", username):
+            return JsonResponse(
+                {
+                    "ERROR": "Invalid Username: Username can contain only letters, numbers and underscore"
+                },
+                status = 400
+            )
+        if not re.match(r"^[A-Za-z1-9._%+-]+@\.[A-Za-z]{2,}$", email):
+            return JsonResponse(
+                {
+                    "ERROR":"Invalid Email format"
+                },
+                status = 400
+            )
+        if len(password) < 8:
+            return JsonResponse(
+                {"ERROR":"Password much contain at least 8 character"},
+                status = 400
+            )
+        if not re.search(r"[A-Z]", password):
+            return JsonResponse(
+                {
+                    "ERROR":"Password must contain at least one upper case letters"
+                }, status = 400
+            )
+        if not re.search(r"[a-z]", password):
+            return JsonResponse(
+                {
+                    "ERROR":"Password must contain at least one lower case latters"
+                },status = 400
+            )
+
+        if not re.search(r"/d", password):
+            return JsonResponse(
+                {
+                    "ERROR":"Password must contain at least one number"
+                }, status = 400
+            )
+        
         if User.objects.filter(username= username).exists():
             return JsonResponse(
                 {"error":"Username already exists"},
@@ -199,6 +239,19 @@ def add_card(request):
 
         card_type = card_type.upper()
 
+        if not re.match(r"^[A-Za-z]+$", card_holder_name):
+            return JsonResponse(
+                {
+                    "error":"Card holder name can contain only latters and one space"
+                }, status = 400
+            )
+        if not re.match(r"^(0[1-9]1[0-9]{2})$", expiry_date):
+            return JsonResponse(
+                {
+                    "ERROR":"the expiry date format is MM-YY"
+                }, status = 400
+            )
+
         if card_type not in ["CREDIT", "DEBIT"]:
             return JsonResponse(
                 {"error": "Card type must be CREDIT or DEBIT"},
@@ -362,10 +415,10 @@ def transaction_history(request):
         try:
             date_value = datetime.strptime(
                 date_filter,
-                "%y-%m-%d"
+                "%Y-%m-%d"
             ).date()
             transactions = transactions.filter(
-                timestamp_date = date_value
+                timestamp__date=date_value
             )
         except ValueError:
             return JsonResponse(
@@ -441,3 +494,5 @@ def export_transactions_csv(request):
 
         ])
     return response
+def api_documentation(request):
+    return render(request,'api_docs.html')

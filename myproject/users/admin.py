@@ -1,6 +1,11 @@
 from django.contrib import admin
+from django.urls import path
+from django.db.models import Sum,Count
+from django.shortcuts import render
+from django.utils import timezone
 from django.contrib.auth.admin import UserAdmin
 from .models import User,Cards,Transactions,AdminLogs
+
 # Register your models here.
 
 @admin.register(User)
@@ -78,6 +83,56 @@ class TransactionsAdmin(admin.ModelAdmin):
         "-timestamp",
     )
 
+    def get_urls(self):
+        urls = super().get_urls()
+
+        custom_urls = [
+            path(
+                "daily-summary/",
+                self.admin_site.admin_view(self.daily_summary),
+                name="daily-payment-summary",
+            ),
+        ]
+
+        return custom_urls + urls
+
+    def daily_summary(self, request):
+
+        today = timezone.now().date()
+
+        transactions = Transactions.objects.filter(
+            timestamp__date=today
+        )
+
+        total_payments = transactions.count()
+
+        successful_payments = transactions.filter(
+            status="SUCCESS"
+        ).count()
+
+        failed_payments = transactions.filter(
+            status="FAILED"
+        ).count()
+
+        total_amount = transactions.aggregate(
+            total=Sum("amount")
+        )["total"] or 0
+
+        context = {
+            "today": today,
+            "total_payments": total_payments,
+            "successful_payments": successful_payments,
+            "failed_payments": failed_payments,
+            "total_amount": total_amount,
+        }
+
+        return render(
+            request,
+            "admin/daily_payment_summary.html",
+            context
+        )
+
+    
 @admin.register(AdminLogs)
 class AdminLogsAdmin(admin.ModelAdmin):
     list_display = (
