@@ -79,7 +79,7 @@ DATABASES = {
         "NAME": "credit_card_system",
         "USER":"root",
         "PASSWORD":"Prajwal@123",
-        "HOST":"localhost",
+        "HOST":"mysql",
         "PORT":"3306"
     }
 }
